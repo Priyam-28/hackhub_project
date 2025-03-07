@@ -6,6 +6,7 @@ import time
 import os
 from datetime import datetime
 import logging
+import pandas as pd
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -23,6 +24,7 @@ class MarketServer:
         self.meme_trends = {}
         self.last_trends_check = 0
         self.trends_check_interval = 10  # Check for new trends every 10 seconds
+        self.excel_file = "market_changes.xlsx"
         
     async def register(self, websocket):
         self.clients.add(websocket)
@@ -201,6 +203,36 @@ class MarketServer:
         self.last_update = current_time
         await self.broadcast_market_update()
         
+        # Save market changes to Excel
+        self.save_market_changes_to_excel()
+        
+    def save_market_changes_to_excel(self):
+        """Save market changes to an Excel file"""
+        try:
+            # Create a DataFrame from the assets
+            data = []
+            for asset_id, asset_data in self.assets.items():
+                data.append({
+                    "Asset": asset_id,
+                    "Price": asset_data["price"],
+                    "Market Cap": asset_data["market_cap"],
+                    "Volume": asset_data["volume"],
+                    "Timestamp": datetime.now().isoformat()
+                })
+            
+            df = pd.DataFrame(data)
+            
+            # Append to Excel file
+            if os.path.exists(self.excel_file):
+                with pd.ExcelWriter(self.excel_file, mode='a', if_sheet_exists='replace') as writer:
+                    df.to_excel(writer, index=False, sheet_name="Market Changes")
+            else:
+                df.to_excel(self.excel_file, index=False, sheet_name="Market Changes")
+                
+            logger.info(f"Saved market changes to {self.excel_file}")
+        except Exception as e:
+            logger.error(f"Error saving market changes to Excel: {e}")
+        
     async def handle_message(self, websocket, message):
         """Handle incoming client messages"""
         data = json.loads(message)
@@ -230,45 +262,8 @@ class MarketServer:
         
         await websocket.send(json.dumps(response))
 
-    # New endpoint to receive meme trends via HTTP
-    async def handle_meme_trends_update(self, request):
-        """Handle meme trend updates from HTTP API"""
-        if request.method == 'POST':
-            try:
-                trend_data = await request.json()
-                self.meme_trends = trend_data.get("scores", {})
-                logger.info(f"Received meme trends via API: {self.meme_trends}")
-                
-                # Update modifiers for each meme coin
-                for asset_id, score in self.meme_trends.items():
-                    if asset_id in self.assets and self.assets[asset_id]["type"] == "meme_coin":
-                        # Convert score (0-100) to impact factor (0.9-1.1)
-                        impact = 0.9 + (score / 500)  # Score 0 -> 0.9, Score 100 -> 1.1
-                        
-                        # Update modifiers
-                        for i, modifier in enumerate(self.assets[asset_id]["modifiers"]):
-                            if modifier["type"] == "meme_trend":
-                                self.assets[asset_id]["modifiers"][i]["impact"] = impact
-                                break
-                        else:
-                            # Add new modifier if not found
-                            self.assets[asset_id]["modifiers"].append({
-                                "type": "meme_trend",
-                                "impact": impact
-                            })
-                            
-                        logger.info(f"Updated {asset_id} meme trend impact to {impact}")
-                
-                return {'status': 'success', 'message': 'Trends updated'}
-            except Exception as e:
-                logger.error(f"Error processing meme trends update: {e}")
-                return {'status': 'error', 'message': str(e)}
-        
-        return {'status': 'error', 'message': 'Method not allowed'}
-        
     async def load_initial_assets(self):
         """Load initial assets into the market"""
-        # These would typically come from a database
         self.assets = {
             "DOGE": {
                 "type": "meme_coin",
@@ -350,7 +345,6 @@ class MarketServer:
             
         logger.info("Initial assets loaded")
         
-    # Modified handler method to handle both path and no-path versions of websocket
     async def handler(self, websocket, path=None):
         """Main handler for WebSocket connections"""
         await self.register(websocket)
@@ -366,15 +360,13 @@ class MarketServer:
         """Start the market server"""
         await self.load_initial_assets()
         
-        # Start the WebSocket server with a callback that works for newer versions of websockets
+        # Start the WebSocket server
         server = await websockets.serve(
             lambda ws, path=None: self.handler(ws, path), 
             "localhost", 
             self.port
         )
         logger.info(f"Market server started on port {self.port}")
-        
-        # If we want to add HTTP endpoint for trend updates, we could use aiohttp here
         
         # Keep the server running
         while True:
