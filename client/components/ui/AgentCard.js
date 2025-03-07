@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-const AgentCard = ({ card, title, cardRef, cardDef, image }) => {
+const AgentCard = ({ card, title, cardRef, restStyles, cardDef, image }) => {
   const tie = (title || "").toUpperCase();
 
   return (
@@ -10,7 +10,7 @@ const AgentCard = ({ card, title, cardRef, cardDef, image }) => {
         className={`relative sm:w-[260px] w-[220px] sm:h-fit h-fit z-0 transition-all 
         bg-transparent border-[#2c2c35] 
         hover:bg-[#25252e] hover:shadow-xl hover:shadow-purple-600/20 
-        cursor-pointer p-1`}
+        cursor-pointer p-1 ${restStyles}`}
       >
         <Image
           src={image}
