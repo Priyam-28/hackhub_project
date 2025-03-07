@@ -1,12 +1,16 @@
 "use client";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../../components/ui/button";
 import { Separator } from "../../components/ui/separator";
 import { Input } from "../../components/ui/input";
-import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import AgentCard from "../../components/ui/AgentCard";
+import { TransactionButton, useActiveAccount } from "thirdweb/react";
+import { readContract,getContract,createThirdwebClient , prepareContractCall } from "thirdweb";
+import { sepolia } from "thirdweb/chains";
+import {gameLogicABI} from '../../lib/gameLogicABI';
+import toast from "react-hot-toast";
 
 export default function JoinBattle() {
   const [selectedAgent, setSelectedAgent] = useState(null);
@@ -15,13 +19,49 @@ export default function JoinBattle() {
   const [battleId, setBattleId] = useState("");
   const [waiting, setWaiting] = useState(false);
 
+  const account=useActiveAccount();
   const router = useRouter();
+
+  const client = createThirdwebClient({
+    clientId: "b1a65889f5717828368b6a3046f24673",
+  });
+
+  const contract = getContract({
+    client: client,
+    chain: sepolia,
+    address: "0xFaF4aE867C9d3888d9f2538C9B0f1022dCC80943",
+    abi: gameLogicABI,
+  });
+
+  const fetchBattles=async()=>{
+     try{
+      if(!account?.address) return;
+      //console.log(gameLogicABI);
+      const battles=await readContract({
+        contract,
+        method:"getExistingBattles",
+        params:[]
+      })
+      //console.log("Battles:",battles);
+        setBattles(battles);
+     }
+     catch(error){
+       console.error("Error fetching battles:",error);
+     }
+
+  }
+
+  useEffect(() => {
+    fetchBattles();
+  }, [account?.address]);
+    
+
 
   // Agents array with extra properties for the AgentCard
   const agents = [
     {
       id: 1,
-      name: "Agent Alpha",
+      name: "Risky Ross",
       description: "Powerful AI with strategic insights.",
       image: "/Ace.png",
       card: 10,
@@ -29,7 +69,7 @@ export default function JoinBattle() {
     },
     {
       id: 2,
-      name: "Agent Beta",
+      name: "Speedy Furiosa",
       description: "Fast and agile for quick battles.",
       image: "/Furiosa.png",
       card: 9,
@@ -37,7 +77,7 @@ export default function JoinBattle() {
     },
     {
       id: 3,
-      name: "Agent Gamma",
+      name: "Balanced Bob",
       description: "Balanced and resilient in tough fights.",
       image: "/Katara.png",
       card: 11,
@@ -45,16 +85,35 @@ export default function JoinBattle() {
     },
   ];
 
-  const handleCreateBattle = () => {
-    if (battleId && battleId > 999 && battleId < 9999) {
-      setWaiting(true);
-      setTimeout(() => {
-        router.push("/battle");
-      }, 3000);
-    } else {
-      toast.error("Please enter a valid battle ID");
-    }
-  };
+  const JoinBattle=(battle)=>{
+    console.log(battle);
+    return prepareContractCall({
+      contract,
+      method:"joinGame",
+      params:[battle]
+    })
+  }
+
+  const handleCreateBattle=async(battleId)=>{
+    return prepareContractCall({
+      contract,
+      method:"createGame",
+      params:[battleId]
+    })
+  }
+
+  // const handleCreateBattle = () => {
+  //   if (battleId) {
+  //     setWaiting(true);
+  //     setTimeout(() => {
+  //       router.push("/battle");
+  //     }, 3000);
+  //   } else {
+  //     toast.error("Please enter a valid battle ID");
+  //   }
+  // };
+
+  console.log("Battles:",battles);
 
   // Agent selection view (before confirmation)
   if (!confirmed) {
@@ -167,9 +226,25 @@ export default function JoinBattle() {
           <div className="flex flex-col gap-4">
             <h2 className="text-white text-xl">Available Battles:</h2>
             {battles.length > 0 ? (
-              <div className="flex items-center">
-                <p className="text-lg font-light text-white">Battles:</p>
-              </div>
+                <div className="flex flex-col gap-4">
+                  {battles.map((battle) => (
+                    <div
+                      key={battle}
+                      className="flex items-center gap-4 cursor-pointer w-full max-w-md justify-between"
+                      //onClick={() => router.push(`/battle/${battle}`)}
+                    >
+                      <p className="text-lg font-light text-white">
+                        Battle ID: {battle}
+                      </p>
+                      {/* <Button className="bg-[#7F46F0] hover:bg-[#7F46F0]/90 text-white px-8 py-6 rounded-md text-lg cursor-pointer">
+                        Join
+                      </Button> */}
+                      <TransactionButton transaction={()=>JoinBattle(battle)} >
+                        Join
+                      </TransactionButton>
+                    </div>
+                  ))}
+                  </div>
             ) : (
               <div className="flex items-center">
                 <p className="text-lg font-light text-white">
@@ -183,19 +258,20 @@ export default function JoinBattle() {
                 Or Create a new Battle
               </p>
               <Input
-                type="number"
+                type="text"
                 value={battleId}
-                placeholder="Enter Battle ID (eg. 5124)"
+                placeholder="Enter Battle Name"
                 className="bg-[#13131a] text-gray-300 h-14 mb-3 w-full max-w-md"
                 onChange={(e) => setBattleId(e.target.value)}
               />
-              {battleId && !isNaN(battleId) && (
-                <Button
-                  className="bg-[#7F46F0] hover:bg-[#7F46F0]/90 text-white px-8 py-6 rounded-md text-lg cursor-pointer"
-                  onClick={handleCreateBattle}
-                >
-                  Create Battle
-                </Button>
+              {battleId && (
+                <TransactionButton transaction={()=>handleCreateBattle(battleId)} onTransactionConfirmed={()=>{
+                  toast.success("Battle Created");
+                  fetchBattles();
+                  setBattleId("");
+                }}>
+                  Create Button
+                </TransactionButton>
               )}
             </div>
           </div>
