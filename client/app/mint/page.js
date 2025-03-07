@@ -1,124 +1,98 @@
 "use client";
-import React, { useEffect } from "react";
-import { MoveRight } from "lucide-react";
-import { Input } from "../../components/ui/input";
+import React, { useEffect, useState } from "react";
+import { MoveRight, Coins } from "lucide-react";
 import { Button } from "../../components/ui/button";
-import { useState } from "react";
 import Image from "next/image";
-import { Coins } from "lucide-react";
-import { sendTransaction } from "thirdweb";
-import { claimTo } from "thirdweb/extensions/erc20";
-import { useActiveAccount } from "thirdweb/react";
+import { useActiveAccount, TransactionButton } from "thirdweb/react";
+import { getContract, createThirdwebClient, toEther, toWei, prepareContractCall, readContract } from "thirdweb";
+import { sepolia } from "thirdweb/chains";
+import { testABI } from "../../lib/contractABI";
 import { useRouter } from "next/navigation";
 
 const Mint = () => {
-  const [amount, setAmount] = useState("");
-  const [avaxPrice, setAvaxPrice] = useState(0);
+  const [balance, setBalance] = useState("0");
   const account = useActiveAccount();
-  const router = useRouter();
+  const router=useRouter();
 
-  const handleConvert = (value) => {
-    const ethPrice = 2288.92;
-    setAvaxPrice((value * ethPrice).toFixed(2));
+  const client = createThirdwebClient({
+    clientId: "b1a65889f5717828368b6a3046f24673",
+  });
+
+  const contract = getContract({
+    client: client,
+    chain: sepolia,
+    address: "0x3d6e3378b6Fd0A004409E2b7f07d2596a174A624",
+    abi: testABI,
+  });
+
+  const buyToken = () => {
+    return prepareContractCall({
+      contract: contract,
+      method: "buyTokens",
+      params: [],
+      value: toWei("0.1"), // Sending 0.1 ETH
+    });
   };
 
-  const handleContinue = () => {
-    console.log(account, avaxPrice);
+  const getBalance = async () => {
+    try {
+      if (!account?.address) return;
+      
+      const balance = await readContract({
+        contract,
+        method: "balanceOf",
+        params: [account.address],
+      });
+
+      setBalance(toEther(BigInt(balance.toString())));
+    } catch (error) {
+      console.error("Error fetching balance:", error);
+    }
   };
+
+  useEffect(() => {
+    getBalance();
+  }, [account?.address]);
 
   return (
     <>
       <main className="w-full flex min-h-screen bg-[#0e0e10]">
         <div className="w-full container mx-auto flex flex-col">
           <div className="w-full flex flex-1">
-            {/* Left side content */}
             <div className="w-1/2 pt-6 pb-8 pr-8">
-              {/* Logo */}
               <div className="flex items-center mb-24">
-                <Image
-                  src="/logo.png"
-                  alt="AvaxGods Logo"
-                  width={195}
-                  height={170}
-                />
+                <Image src="/logo.svg" alt="AvaxGods Logo" width={150} height={150} />
               </div>
 
-              {/* Main heading with vertical line */}
-              <div className="flex mb-12">
-                <div className="w-1 bg-purple-600 mr-6"></div>
-                <h1 className="text-white text-5xl font-bold leading-tight">
-                  Welcome to Avax-Gods <br /> a Web3 NFT Card Game
-                </h1>
-              </div>
+              <h1 className="text-white text-5xl font-bold leading-tight">
+                Welcome to Avax-Gods <br /> a Web3 NFT Card Game
+              </h1>
+              <p className="text-[#4a9eff] text-xl mb-12">Convert your ETH to Billu Coins</p>
 
-              {/* Subtext */}
-              <p className="text-[#4a9eff] text-xl mb-12">
-                Convert your ETH to Tan Coins
-              </p>
+              <h3 className="text-2xl font-semibold text-white">Billu Coins: {balance}</h3>
 
-              {/* Multi-step Form */}
-              <div className="mt-auto">
-                <div className="flex gap-4">
-                  <h2 className="text-white text-xl mb-4">ETH Amount</h2>
-                  <MoveRight className="text-white" />
-                  <h2 className="text-white text-xl mb-4 flex">
-                    Billu Coins
-                    <span className="ml-1 mt-1">
-                      <Coins size={20} />
-                    </span>
-                  </h2>
-                </div>
-                <Input
-                  type="number"
-                  placeholder="Enter ETH Amount"
-                  value={amount}
-                  onChange={(e) => {
-                    setAmount(e.target.value);
-                    if (e.target.value && !isNaN(Number(e.target.value))) {
-                      handleConvert(Number(e.target.value));
-                    } else {
-                      setAvaxPrice(0);
-                    }
+              <div className="flex justify-between items-center mt-6">
+                <TransactionButton
+                  transaction={() => buyToken()} // Wrapped inside an arrow function
+                  onTransactionConfirmed={() => {
+                    alert("Tokens Purchased!");
+                    getBalance(); // Refresh balance after purchase
                   }}
-                  className="bg-[#13131a] text-gray-300 h-14 mb-6 w-full max-w-md"
-                  autoFocus
-                />
-                <div className="mb-4">
-                  <h3 className="text-2xl font-semibold text-white">
-                    Billu Coin: {avaxPrice}
-                  </h3>
-                </div>
-
-                <div className="flex justify-between items-center">
-                  <Button
-                    className="bg-[#7F46F0] hover:bg-[#7F46F0]/90 text-white px-8 py-6 rounded-md text-lg cursor-pointer"
-                    onClick={handleContinue}
-                  >
-                    Convert
-                  </Button>
-                  <span className="text-white text-xl italic">Or</span>
-                  <Button
-                    className="bg-[#7F46F0] hover:bg-[#7F46F0]/90 text-white px-8 py-6 rounded-md text-lg cursor-pointer"
-                    onClick={() => {
-                      router.push("/join");
-                    }}
-                  >
-                    Join Battle
-                  </Button>
-                </div>
+                >
+                  Buy Tokens
+                </TransactionButton>
+                <span className="text-white text-xl">Or</span>
+                <Button
+                  className="bg-[#7F46F0] hover:bg-[#7F46F0]/90 text-white px-8 py-6 rounded-md text-lg cursor-pointer"
+                  onClick={()=>router.push('/join')}
+                >
+                  Join Battle
+                </Button>
               </div>
             </div>
 
-            {/* Right side hero image */}
             <div className="w-1/2 flex items-center min-h-screen">
-              <Image
-                src="/bg-normal.webp"
-                alt="Hero"
-                className="object-cover min-h-full w-auto"
-                width={600}
-                height={800}
-                priority
-              />
+              <Image src="/bg-normal.webp" alt="Hero" className="object-cover min-h-full w-auto" width={600} height={800} priority />
             </div>
           </div>
         </div>
