@@ -17,6 +17,7 @@ import {
 import { useState, useEffect } from "react";
 import { sepolia } from "thirdweb/chains";
 import { testABI } from "../../lib/contractABI";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
   const [balance, setBalance] = useState("0");
@@ -66,23 +67,30 @@ const Navbar = () => {
     <nav className="flex items-center justify-between h-18 px-8 bg-black shadow-md">
       <div className="flex items-center">
         <Link href="/">
-          <Image src="/logo.png" alt="Logo" width={195} height={170} priority />
+          <Image src="/logo.png" alt="Logo" width={150} height={120} priority />
         </Link>
       </div>
 
       <div className="flex items-center gap-2">
         {account && (
-          <TransactionButton
-            transaction={() => buyToken()} // Wrapped inside an arrow function
-            onTransactionConfirmed={() => {
-              alert("Tokens Purchased!");
-              getBalance(); // Refresh balance after purchase
-            }}
-          >
-            Buy Tokens
-          </TransactionButton>
+          <div className="flex items-center gap-4 text-sm font-bold">
+            <h3 className="text-white text-xl">
+              Billu Coins:{" "}
+              <span className="text-purple-500">
+                {Number(balance).toFixed(2)}
+              </span>
+            </h3>
+            <TransactionButton
+              transaction={() => buyToken()}
+              onTransactionConfirmed={() => {
+                toast.success("Tokens Purchased!");
+                getBalance();
+              }}
+            >
+              Buy Tokens
+            </TransactionButton>
+          </div>
         )}
-
         <ConnectButton client={client} chain={chain} />
       </div>
     </nav>
