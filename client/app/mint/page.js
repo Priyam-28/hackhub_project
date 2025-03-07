@@ -64,18 +64,9 @@ const Mint = () => {
 
   return (
     <>
-      <main className="w-full flex min-h-screen bg-[#0e0e10]">
+      <main className="w-full flex min-h-[calc(100vh-4.5rem)] bg-[#0e0e10]">
         <div className="w-full flex flex-1">
-          <div className="w-1/2 pt-6 pb-8 px-8">
-            <div className="flex items-center mb-24">
-              <Image
-                src="/logo.png"
-                alt="AvaxGods Logo"
-                width={195}
-                height={170}
-              />
-            </div>
-
+          <div className="w-1/2 py-14 px-8">
             <div className="flex mb-12">
               <div className="w-1 bg-purple-600 mr-6"></div>
               <h1 className="text-white text-5xl font-bold leading-tight">
@@ -110,7 +101,7 @@ const Mint = () => {
             </div>
           </div>
 
-          <div className="w-1/2 flex items-center min-h-screen">
+          <div className="w-1/2 flex items-center h-full">
             <Image
               src="/bg-normal.webp"
               alt="Hero"

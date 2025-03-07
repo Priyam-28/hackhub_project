@@ -4,7 +4,7 @@ import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ConnectButton, useActiveAccount } from "thirdweb/react";
+import { ConnectEmbed, useActiveAccount } from "thirdweb/react";
 import { client } from "../web3/client";
 import { chain } from "../web3/chain";
 import Overlay from "../components/ui/Overlay";
@@ -23,14 +23,14 @@ export default function Home() {
   };
 
   return (
-    <main className="w-full flex min-h-screen bg-[#0e0e10]">
+    <main className="w-full flex min-h-[calc(100vh-4.5rem)] bg-[#0e0e10]">
       <Overlay show={isLoading} />
 
       <div className="w-full flex flex-1">
         {/* Left side content */}
-        <div className="w-1/2 pt-6 py-8 px-8">
+        <div className="w-1/2 py-14 px-8">
           {/* Main heading with vertical line */}
-          <div className="flex mb-12">
+          <div className="flex mb-8">
             <div className="w-1 bg-purple-600 mr-6"></div>
             <h1 className="text-white text-5xl font-bold leading-tight">
               Welcome to Avax-Gods <br />a Web3 NFT Card Game
@@ -63,7 +63,9 @@ export default function Home() {
                 </Button>
               </>
             )}
-            <ConnectButton client={client} chain={chain} />
+            <div className="mt-auto flex justify-center">
+              <ConnectEmbed chain={chain} client={client} />
+            </div>
           </div>
         </div>
 

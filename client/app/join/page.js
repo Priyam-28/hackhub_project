@@ -59,19 +59,10 @@ export default function JoinBattle() {
   // Agent selection view (before confirmation)
   if (!confirmed) {
     return (
-      <main className="w-full flex min-h-screen bg-[#0e0e10]">
+      <main className="w-full flex min-h-[calc(100vh-4.5rem)] bg-[#0e0e10]">
         <div className="w-full flex flex-1">
           {/* Left side content */}
           <div className="w-3/5 pt-6 pb-6 px-8 flex flex-col gap-12">
-            <div className="flex items-center">
-              <Image
-                src="/logo.png"
-                alt="AvaxGods Logo"
-                width={195}
-                height={170}
-              />
-            </div>
-
             <div className="flex flex-col gap-2">
               <div className="flex">
                 <div className="w-1 bg-purple-600 mr-6"></div>
@@ -122,7 +113,7 @@ export default function JoinBattle() {
           </div>
 
           {/* Right side hero image */}
-          <div className="w-2/5 flex items-center min-h-screen">
+          <div className="w-2/5 flex items-center h-full">
             <Image
               src="/bg-normal.webp"
               alt="Hero"
@@ -153,17 +144,7 @@ export default function JoinBattle() {
       {/* Main content container */}
       <div className="w-full flex flex-1">
         {/* Left side content */}
-        <div className="w-1/2 pt-6 pb-8 px-8">
-          {/* Logo */}
-          <div className="flex items-center mb-8">
-            <Image
-              src="/logo.png"
-              alt="AvaxGods Logo"
-              width={195}
-              height={170}
-            />
-          </div>
-
+        <div className="w-1/2 py-14 px-8 flex flex-col gap-6">
           {/* Main heading with vertical line */}
           <div className="flex mb-4">
             <div className="w-1 bg-purple-600 mr-6"></div>
@@ -172,23 +153,25 @@ export default function JoinBattle() {
             </h1>
           </div>
 
-          <p className="text-[#4a9eff] text-xl mb-4">
-            You have selected:{" "}
-            <span className="font-bold">{selectedAgent.name}</span>
-          </p>
+          <div className="flex flex-col gap-2">
+            <p className="text-[#4a9eff] text-xl">
+              You have selected:{" "}
+              <span className="font-bold">{selectedAgent.name}</span>
+            </p>
 
-          <p className="text-[#4a9eff] text-xl mb-8">
-            Join an existing battle and start playing
-          </p>
+            <p className="text-[#4a9eff] text-xl">
+              Join an existing battle and start playing
+            </p>
+          </div>
 
-          <div className="mt-auto">
-            <h2 className="text-white text-xl mb-6">Available Battles:</h2>
+          <div className="flex flex-col gap-4">
+            <h2 className="text-white text-xl">Available Battles:</h2>
             {battles.length > 0 ? (
-              <div className="flex items-center mb-6">
+              <div className="flex items-center">
                 <p className="text-lg font-light text-white">Battles:</p>
               </div>
             ) : (
-              <div className="flex items-center mb-6">
+              <div className="flex items-center">
                 <p className="text-lg font-light text-white">
                   No Battles available: Reload page
                 </p>
@@ -219,7 +202,7 @@ export default function JoinBattle() {
         </div>
 
         {/* Right side hero image */}
-        <div className="w-1/2 flex items-center h-screen">
+        <div className="w-1/2 flex items-center h-full">
           <Image
             src="/bg-normal.webp"
             alt="Hero"

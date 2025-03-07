@@ -7,7 +7,7 @@ import { chain } from "../../web3/chain";
 
 const Navbar = () => {
   return (
-    <nav className="flex items-center justify-between px-8  py-4 bg-black shadow-md">
+    <nav className="flex items-center justify-between h-18 px-8 bg-black shadow-md">
       <div className="flex items-center">
         <Link href="/">
           <Image src="/logo.png" alt="Logo" width={195} height={170} priority />
@@ -15,11 +15,7 @@ const Navbar = () => {
       </div>
 
       <div>
-        <ConnectButton
-          client={client}
-          chain={chain}
-          style={{ height: "80px" }}
-        />
+        <ConnectButton client={client} chain={chain} />
       </div>
     </nav>
   );
