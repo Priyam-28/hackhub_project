@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import Image from "next/image";
-import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { ConnectButton, useActiveAccount } from "thirdweb/react";
 import { client } from "../web3/client";
@@ -29,17 +28,7 @@ export default function Home() {
 
       <div className="w-full flex flex-1">
         {/* Left side content */}
-        <div className="w-1/2 pt-6 pb-8 px-8">
-          {/* Logo */}
-          <div className="flex items-center mb-24">
-            <Image
-              src="/logo.png"
-              alt="AvaxGods Logo"
-              width={195}
-              height={170}
-            />
-          </div>
-
+        <div className="w-1/2 pt-6 py-8 px-8">
           {/* Main heading with vertical line */}
           <div className="flex mb-12">
             <div className="w-1 bg-purple-600 mr-6"></div>
@@ -79,7 +68,7 @@ export default function Home() {
         </div>
 
         {/* Right side hero image */}
-        <div className="w-1/2 flex items-center min-h-screen">
+        <div className="w-1/2 flex items-center">
           <Image
             src="/bg-normal.webp"
             alt="Hero"
