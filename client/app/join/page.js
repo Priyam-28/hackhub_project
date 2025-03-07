@@ -130,7 +130,7 @@ export default function JoinBattle() {
 
   // Once the selection is confirmed, show the Join a Battle component.
   return (
-    <main className="w-full flex min-h-screen bg-[#0e0e10]">
+    <main className="w-full flex min-h-[calc(100vh-4.5rem)] bg-[#0e0e10]">
       {waiting && (
         <div className="absolute top-0 right-0 w-full h-full backdrop-blur-md p-8 z-30 flex flex-col items-center justify-center gap-8">
           <h1 className="text-white text-4xl font-bold leading-tight">

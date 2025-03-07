@@ -19,7 +19,7 @@ export default function Home() {
   // Handle Registration
   const handleRegister = () => {
     setIsLoading(true);
-    router.push("./mint");
+    router.push("./join");
   };
 
   return (
