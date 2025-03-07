@@ -103,8 +103,8 @@ export default function JoinBattle() {
                           : "border border-[#2c2c35]"
                       }
                       cardRef={null}
-                      playerTwo={false}
                       cardDef={agent.cardDef}
+                      image={agent.image}
                     />
                   </div>
                 ))}

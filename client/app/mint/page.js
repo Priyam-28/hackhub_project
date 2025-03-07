@@ -4,7 +4,14 @@ import { MoveRight, Coins } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import Image from "next/image";
 import { useActiveAccount, TransactionButton } from "thirdweb/react";
-import { getContract, createThirdwebClient, toEther, toWei, prepareContractCall, readContract } from "thirdweb";
+import {
+  getContract,
+  createThirdwebClient,
+  toEther,
+  toWei,
+  prepareContractCall,
+  readContract,
+} from "thirdweb";
 import { sepolia } from "thirdweb/chains";
 import { testABI } from "../../lib/contractABI";
 import { useRouter } from "next/navigation";
@@ -12,7 +19,7 @@ import { useRouter } from "next/navigation";
 const Mint = () => {
   const [balance, setBalance] = useState("0");
   const account = useActiveAccount();
-  const router=useRouter();
+  const router = useRouter();
 
   const client = createThirdwebClient({
     clientId: "b1a65889f5717828368b6a3046f24673",
@@ -37,7 +44,7 @@ const Mint = () => {
   const getBalance = async () => {
     try {
       if (!account?.address) return;
-      
+
       const balance = await readContract({
         contract,
         method: "balanceOf",
@@ -61,15 +68,27 @@ const Mint = () => {
           <div className="w-full flex flex-1">
             <div className="w-1/2 pt-6 pb-8 pr-8">
               <div className="flex items-center mb-24">
-                <Image src="/logo.svg" alt="AvaxGods Logo" width={150} height={150} />
+                <Image
+                  src="/logo.png"
+                  alt="AvaxGods Logo"
+                  width={195}
+                  height={170}
+                />
               </div>
 
-              <h1 className="text-white text-5xl font-bold leading-tight">
-                Welcome to Avax-Gods <br /> a Web3 NFT Card Game
-              </h1>
-              <p className="text-[#4a9eff] text-xl mb-12">Convert your ETH to Billu Coins</p>
+              <div className="flex mb-12">
+                <div className="w-1 bg-purple-600 mr-6"></div>
+                <h1 className="text-white text-5xl font-bold leading-tight">
+                  Welcome to Avax-Gods <br /> a Web3 NFT Card Game
+                </h1>
+              </div>
+              <p className="text-[#4a9eff] text-xl mb-12">
+                Convert your ETH to Billu Coins
+              </p>
 
-              <h3 className="text-2xl font-semibold text-white">Billu Coins: {balance}</h3>
+              <h3 className="text-2xl font-semibold text-white">
+                Billu Coins: {balance}
+              </h3>
 
               <div className="flex justify-between items-center mt-6">
                 <TransactionButton
@@ -84,7 +103,7 @@ const Mint = () => {
                 <span className="text-white text-xl">Or</span>
                 <Button
                   className="bg-[#7F46F0] hover:bg-[#7F46F0]/90 text-white px-8 py-6 rounded-md text-lg cursor-pointer"
-                  onClick={()=>router.push('/join')}
+                  onClick={() => router.push("/join")}
                 >
                   Join Battle
                 </Button>
@@ -92,7 +111,14 @@ const Mint = () => {
             </div>
 
             <div className="w-1/2 flex items-center min-h-screen">
-              <Image src="/bg-normal.webp" alt="Hero" className="object-cover min-h-full w-auto" width={600} height={800} priority />
+              <Image
+                src="/bg-normal.webp"
+                alt="Hero"
+                className="object-cover min-h-full w-auto"
+                width={600}
+                height={800}
+                priority
+              />
             </div>
           </div>
         </div>
