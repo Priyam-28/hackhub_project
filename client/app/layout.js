@@ -1,0 +1,22 @@
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { Toaster } from "react-hot-toast";
+import { ThirdwebProvider } from "../web3/thirdweb";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata = {
+  title: "Avax-Gods | Web3 NFT Card Game",
+  description: "The ultimate Web3 Battle card game",
+};
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body className={inter.className}>
+        <Toaster position="top-center" />
+        <ThirdwebProvider>{children}</ThirdwebProvider>
+      </body>
+    </html>
+  );
+}
