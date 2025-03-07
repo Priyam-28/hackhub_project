@@ -33,7 +33,8 @@ export default function Home() {
           <div className="flex mb-8">
             <div className="w-1 bg-purple-600 mr-6"></div>
             <h1 className="text-white text-5xl font-bold leading-tight">
-              Welcome to Avax-Gods <br />a Web3 NFT Card Game
+              Welcome to Etherial Empire <br />{" "}
+              <span className="text-2xl">a Web3 NFT Game</span>
             </h1>
           </div>
 

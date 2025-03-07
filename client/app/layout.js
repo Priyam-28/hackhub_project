@@ -7,7 +7,7 @@ import Navbar from "../components/ui/Navbar";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Avax-Gods | Web3 NFT Card Game",
+  title: "Etherial Empire | Web3 NFT Card Game",
   description: "The ultimate Web3 Battle card game",
 };
 
