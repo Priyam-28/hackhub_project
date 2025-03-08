@@ -16,16 +16,68 @@ import {
 } from "../../../components/ui/popover";
 import toast from "react-hot-toast";
 import ChangeBg from "../../../components/ui/ChangeBg";
+import {
+  readContract,
+  getContract,
+  createThirdwebClient,
+  prepareContractCall,
+} from "thirdweb";
+import { gameLogicABI } from "../../../lib/gameLogicABI";
+import { sepolia } from "thirdweb/chains";
+import { useActiveAccount } from "thirdweb/react";
+import { useRouter } from "next/navigation";
+
 
 const AgentCardWithPopover = ({ agent, otherAgents }) => {
   const [popoverContent, setPopoverContent] = useState("menu");
   const [open, setOpen] = useState(false);
+  const [winner,setWinner]=useState(true);
+  const router=useRouter();
+  
+  const account=useActiveAccount();
+
+  const zeroAddress = "0x0000000000000000000000000000000000000000";
+
+
+  const client = createThirdwebClient({
+    clientId: "b1a65889f5717828368b6a3046f24673",
+  });
+
+  const contract = getContract({
+    client: client,
+    chain: sepolia,
+    address: "0x62A42Aee8f3610F606834f02fB3F9080B08EedA0",
+    abi: gameLogicABI,
+  });
+
 
   const transactionDetails = [
     "Transaction 1: +5 pts",
     "Transaction 2: -3 pts",
     "Transaction 3: +2 pts",
   ];
+
+  const arenaDetails=async()=>{
+    const data=await readContract({
+      contract,
+      method:"getArenaDetails",
+      params:["1"]
+    })
+    console.log(data[3]);
+    setWinner(data[3]);
+
+  }
+
+  useEffect(() => {
+    arenaDetails();
+  }, [account?.address]);
+
+  useEffect(() => {
+    if(winner){
+      //toast.success(`The winner is ${winner}`);
+      router.push('/join');
+    }
+  }, [account?.address]);
 
   const sabotageAgent = (targetAgent) => {
     toast.success(`Sabotaging ${targetAgent.name}!`);

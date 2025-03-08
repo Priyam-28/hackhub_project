@@ -24,6 +24,7 @@ export default function JoinBattle() {
   const [battleId, setBattleId] = useState("");
   const [waiting, setWaiting] = useState(false);
   const [connectedPlayers,setConnectedPlayers]=useState([]);
+  const [pushVal,setPushVal]=useState(false);
 
   const account = useActiveAccount();
   const router = useRouter();
@@ -60,6 +61,12 @@ export default function JoinBattle() {
           params:["1"]
         })
         setConnectedPlayers(data[1]);
+        setPushVal(data[3]);
+        console.log(data[3]);
+        console.log(data[2]);
+        if(data[3]==zeroAddress){
+          router.push(`/battle/`+data[0]);
+        }
       }
       //console.log(data[1]);
       
@@ -72,13 +79,13 @@ export default function JoinBattle() {
   }
 
 
-  useEffect(() => {
-    // Check if every address in the array is NOT equal to zero address
-    if (connectedPlayers.length > 0 && connectedPlayers.every(addr => addr !== zeroAddress)) {
-      router.push('/battle/1');
-    }
+  // useEffect(() => {
+  //   // Check if every address in the array is NOT equal to zero address
+  //   if(!pushVal){
+  //     router.push("/battle/1");
+  //   }
     
-  }, [connectedPlayers])
+  // }, [connectedPlayers])
 
   useEffect(() => {
     pushConnectedUser()
