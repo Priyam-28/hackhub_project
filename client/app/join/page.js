@@ -23,13 +23,13 @@ export default function JoinBattle() {
   const [battles, setBattles] = useState([]);
   const [battleId, setBattleId] = useState("");
   const [waiting, setWaiting] = useState(false);
-  const [connectedPlayers,setConnectedPlayers]=useState([]);
-  const [pushVal,setPushVal]=useState(false);
+  const [connectedPlayers, setConnectedPlayers] = useState([]);
+  const [pushVal, setPushVal] = useState(false);
 
   const account = useActiveAccount();
   const router = useRouter();
 
-  const [currentBattle,setCurrentBattle]="";
+  const [currentBattle, setCurrentBattle] = "";
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
 
@@ -46,49 +46,48 @@ export default function JoinBattle() {
 
   const pushConnectedUser = async () => {
     if (!account?.address) return;
-    
+
     try {
-      const getId=await readContract({
+      const getId = await readContract({
         contract,
-        method:"gameIdByName",
-        params:["test2"]
-      })
+        method: "gameIdByName",
+        params: ["test2"],
+      });
       console.log(getId);
-      if(getId){
-        const data=await readContract({
+      if (getId) {
+        const data = await readContract({
           contract,
-          method:"getArenaDetails",
-          params:["1"]
-        })
+          method: "getArenaDetails",
+          params: ["1"],
+        });
         setConnectedPlayers(data[1]);
         setPushVal(data[3]);
         console.log(data[3]);
         console.log(data[2]);
-        if(data[3]==zeroAddress){
-          router.push(`/battle/`+data[0]);
+        if (data[3] == zeroAddress) {
+          // router.push(`/battle/`+data[0]);
+          router.push(`/battle/${data[0]}`);
         }
       }
       //console.log(data[1]);
-      
+
       // console.log(data[1]);
       // setConnectedPlayers(data[1]);
-    }
-    catch (error) {
+    } catch (error) {
       console.error("Error pushing connected user:", error);
     }
-  }
-
+  };
 
   // useEffect(() => {
   //   // Check if every address in the array is NOT equal to zero address
   //   if(!pushVal){
   //     router.push("/battle/1");
   //   }
-    
+
   // }, [connectedPlayers])
 
   useEffect(() => {
-    pushConnectedUser()
+    pushConnectedUser();
   }, [account?.address]);
 
   const fetchBattles = async () => {
