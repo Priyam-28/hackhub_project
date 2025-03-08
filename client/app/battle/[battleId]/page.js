@@ -250,7 +250,13 @@ const BattleArena = () => {
                     <li>Rule 5: Have fun and play fair!</li>
                   </ul>
                 </div>
-                <div>
+                <div className="flex gap-2">
+                  <Button
+                    className="bg-[#7F46F0] hover:bg-[#7F46F0]/80 cursor-pointer text-white"
+                    variant="primary"
+                  >
+                    Change battleground
+                  </Button>
                   <Button
                     variant="destructive"
                     className="hover:bg-red-500 cursor-pointer"
