@@ -26,54 +26,19 @@ import { gameLogicABI } from "../../../lib/gameLogicABI";
 import { sepolia } from "thirdweb/chains";
 import { useActiveAccount } from "thirdweb/react";
 import { useRouter } from "next/navigation";
-import { useParams } from "next/navigation";
-
 
 const AgentCardWithPopover = ({ agent, otherAgents }) => {
   const [popoverContent, setPopoverContent] = useState("menu");
   const [open, setOpen] = useState(false);
-  const [winner, setWinner] = useState(true);
   const router = useRouter();
 
-  const [address, setAddress] = useState([]);
-  const account = useActiveAccount();
-
   const zeroAddress = "0x0000000000000000000000000000000000000000";
-
-  const client = createThirdwebClient({
-    clientId: "b1a65889f5717828368b6a3046f24673",
-  });
-
-  const contract = getContract({
-    client: client,
-    chain: sepolia,
-    address: "0x62A42Aee8f3610F606834f02fB3F9080B08EedA0",
-    abi: gameLogicABI,
-  });
 
   const transactionDetails = [
     "Transaction 1: +5 pts",
     "Transaction 2: -3 pts",
     "Transaction 3: +2 pts",
   ];
-
-  const arenaDetails = async () => {
-    const data = await readContract({
-      contract,
-      method: "getArenaDetails",
-      params: ["2"],
-    });
-    //console.log(data[3]);
-    setWinner(data[3]);
-    
-    setAddress(Object.values(data[1]));
-    //console.log(data[1]);
-  };
-
-  useEffect(() => {
-    arenaDetails();
-  }, [account?.address]);
-
 
   const sabotageAgent = (targetAgent) => {
     toast.success(`Sabotaging ${targetAgent.name}!`);
@@ -85,11 +50,6 @@ const AgentCardWithPopover = ({ agent, otherAgents }) => {
     setOpen(false);
     setPopoverContent("menu");
   };
-
-  useEffect(()=>{
-    console.log(address)
-    console.log(typeof address)
-  },[address])
 
   return (
     <Popover
@@ -108,16 +68,6 @@ const AgentCardWithPopover = ({ agent, otherAgents }) => {
             cardDef={agent.cardDef}
             image={agent.image}
           />
-          {/* {address.slice(0,4).map((title, index) => (
-            <AgentCard
-              key={index} // Ensure unique key for React reconciliation
-              card={agent.card} // Ensure you get the correct agent data
-              title={title} // Mapping address as title
-              cardRef={null}
-              cardDef={agent.cardDef}
-              image={agent.image}
-            />
-          ))} */}
         </div>
       </PopoverTrigger>
       <PopoverContent className="bg-gray-900 border border-blue-600 p-4 rounded-lg shadow-lg max-w-xs">
@@ -191,6 +141,49 @@ const BattleArena = () => {
   const [showRulesOverlay, setShowRulesOverlay] = useState(false);
   const [showChangeBg, setShowChangeBg] = useState(false);
   const [selectedBg, setSelectedBg] = useState("/panight.jpg");
+  const [addresses, setAddresses] = useState([]);
+  const [winner, setWinner] = useState(true);
+
+  const account = useActiveAccount();
+
+  const client = createThirdwebClient({
+    clientId: "b1a65889f5717828368b6a3046f24673",
+  });
+
+  const contract = getContract({
+    client: client,
+    chain: sepolia,
+    address: "0x62A42Aee8f3610F606834f02fB3F9080B08EedA0",
+    abi: gameLogicABI,
+  });
+
+  const arenaDetails = async () => {
+    try {
+      const data = await readContract({
+        contract,
+        method: "getArenaDetails",
+        params: ["2"],
+      });
+      setWinner(data[3]);
+
+      // Ensure data[1] is defined and then convert it to an array.
+      if (data[1]) {
+        setAddresses(Object.values(data[1]));
+      }
+    } catch (error) {
+      console.error("Error fetching arena details:", error);
+    }
+  };
+
+  useEffect(() => {
+    arenaDetails();
+  }, [account?.address]);
+
+  // useEffect(() => {
+  //   console.log(addresses[1]);
+  //   console.log(typeof addresses);
+  //   console.log(winner);
+  // }, [addresses]);
 
   // Fake leaderboard data
   const leaderboardData = [
@@ -199,31 +192,37 @@ const BattleArena = () => {
     { id: 3, name: "Agent Gamma", score: 95 },
   ];
 
+  // Function to slice address to first 6 characters
+  const slicedAddress = (addr) => {
+    return addr ? addr.slice(0, 6) : "N/A";
+  };
+
+  // Create the agents array; check if the corresponding address exists
   const agents = [
     {
       id: 1,
-      name: "Agent Alpha",
+      name: addresses[0] ? slicedAddress(addresses[0]) : "N/A",
       image: "/Dusk_Rigger.png",
       card: 10,
       cardDef: 8,
     },
     {
       id: 2,
-      name: "Agent Beta",
+      name: addresses[1] ? slicedAddress(addresses[1]) : "N/A",
       image: "/Geomancer.png",
       card: 9,
       cardDef: 7,
     },
     {
       id: 3,
-      name: "Agent Gamma",
+      name: addresses[2] ? slicedAddress(addresses[2]) : "N/A",
       image: "/Coalfist.png",
       card: 11,
       cardDef: 9,
     },
     {
       id: 4,
-      name: "Agent Delta",
+      name: addresses[3] ? slicedAddress(addresses[3]) : "N/A",
       image: "/Desolator.png",
       card: 12,
       cardDef: 10,
@@ -236,12 +235,12 @@ const BattleArena = () => {
       try {
         setSelectedBg(JSON.parse(storedBg));
       } catch (error) {
-        console.error("Error parsing selectedAgent from localStorage", error);
+        console.error("Error parsing selectedBg from localStorage", error);
       }
     }
   }, []);
 
-  // Persist waiting state to localStorage when it changes
+  // Persist selected background to localStorage when it changes
   useEffect(() => {
     if (selectedBg) {
       localStorage.setItem("selectedBg", JSON.stringify(selectedBg));
@@ -354,7 +353,6 @@ const BattleArena = () => {
                     variant="destructive"
                     className="hover:bg-red-500 cursor-pointer"
                     onClick={() => {
-                      // Replace this with your exit battle logic if needed.
                       toast.success("Exiting Battle...");
                       setShowRulesOverlay(false);
                     }}

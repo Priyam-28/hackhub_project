@@ -24,9 +24,6 @@ const Navbar = () => {
   const [balance, setBalance] = useState("0");
   const account = useActiveAccount();
   const pathname = usePathname();
-  if (pathname.startsWith("/battle")) {
-    console.log("Battle page");
-  }
 
   const client = createThirdwebClient({
     clientId: "b1a65889f5717828368b6a3046f24673",
