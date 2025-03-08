@@ -185,13 +185,6 @@ const BattleArena = () => {
   //   console.log(winner);
   // }, [addresses]);
 
-  // Fake leaderboard data
-  const leaderboardData = [
-    { id: 1, name: "Agent Alpha", score: 120 },
-    { id: 2, name: "Agent Beta", score: 110 },
-    { id: 3, name: "Agent Gamma", score: 95 },
-  ];
-
   // Function to slice address to first 6 characters
   const slicedAddress = (addr) => {
     return addr ? addr.slice(0, 6) : "N/A";
@@ -226,6 +219,30 @@ const BattleArena = () => {
       image: "/Desolator.png",
       card: 12,
       cardDef: 10,
+    },
+  ];
+
+  // Fake leaderboard data
+  const leaderboardData = [
+    {
+      id: 1,
+      name: addresses[2] ? slicedAddress(addresses[2]) : "N/A",
+      score: 120,
+    },
+    {
+      id: 2,
+      name: addresses[0] ? slicedAddress(addresses[0]) : "N/A",
+      score: 110,
+    },
+    {
+      id: 3,
+      name: addresses[3] ? slicedAddress(addresses[2]) : "N/A",
+      score: 95,
+    },
+    {
+      id: 3,
+      name: addresses[1] ? slicedAddress(addresses[1]) : "N/A",
+      score: 82,
     },
   ];
 
