@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Tabs,
   TabsContent,
@@ -15,6 +15,7 @@ import {
   PopoverContent,
 } from "../../../components/ui/popover";
 import toast from "react-hot-toast";
+import ChangeBg from "../../../components/ui/ChangeBg";
 
 const AgentCardWithPopover = ({ agent, otherAgents }) => {
   const [popoverContent, setPopoverContent] = useState("menu");
@@ -125,6 +126,8 @@ const AgentCardWithPopover = ({ agent, otherAgents }) => {
 
 const BattleArena = () => {
   const [showRulesOverlay, setShowRulesOverlay] = useState(false);
+  const [showChangeBg, setShowChangeBg] = useState(false);
+  const [selectedBg, setSelectedBg] = useState("/panight.jpg");
 
   // Fake leaderboard data
   const leaderboardData = [
@@ -164,6 +167,26 @@ const BattleArena = () => {
     },
   ];
 
+  useEffect(() => {
+    const storedBg = localStorage.getItem("selectedBg");
+    if (storedBg) {
+      try {
+        setSelectedBg(JSON.parse(storedBg));
+      } catch (error) {
+        console.error("Error parsing selectedAgent from localStorage", error);
+      }
+    }
+  }, []);
+
+  // Persist waiting state to localStorage when it changes
+  useEffect(() => {
+    if (selectedBg) {
+      localStorage.setItem("selectedBg", JSON.stringify(selectedBg));
+    } else {
+      localStorage.removeItem("selectedBg");
+    }
+  }, [selectedBg]);
+
   return (
     <div className="relative w-full h-screen">
       <Tabs defaultValue="arena" className="w-full h-full">
@@ -179,12 +202,16 @@ const BattleArena = () => {
 
         {/* Arena Tab */}
         <TabsContent value="arena" className="w-full h-full p-0">
-          <div className="relative w-full h-full">
-            {/* Full-screen background image */}
-            <div
-              className="w-full h-full bg-cover bg-center"
-              style={{ backgroundImage: "url('/panight.jpg')" }}
-            ></div>
+          <div
+            className="relative w-full h-full bg-cover bg-center"
+            style={{ backgroundImage: `url(${selectedBg})` }}
+          >
+            {showChangeBg && (
+              <ChangeBg
+                setSelectedBg={setSelectedBg}
+                close={() => setShowChangeBg(false)}
+              />
+            )}
 
             {/* Show Rules button at top-right */}
             <div className="absolute top-4 right-4 z-20">
@@ -221,7 +248,7 @@ const BattleArena = () => {
 
             {/* Rules Overlay (covers half of the screen on the right) */}
             {showRulesOverlay && (
-              <div className="absolute top-0 right-0 w-1/2 h-full backdrop-blur-3xl p-8 z-30 flex flex-col justify-between">
+              <div className="absolute top-0 right-0 w-1/2 h-full backdrop-blur-3xl p-8 z-20 flex flex-col justify-between">
                 <div className="relative">
                   <div className="flex justify-between items-start mb-4">
                     <h2 className="text-3xl font-bold text-white">
@@ -250,7 +277,16 @@ const BattleArena = () => {
                     <li>Rule 5: Have fun and play fair!</li>
                   </ul>
                 </div>
-                <div>
+                <div className="flex gap-2">
+                  {!showChangeBg && (
+                    <Button
+                      variant="primary"
+                      onClick={() => setShowChangeBg(true)}
+                      className="bg-purple-600 text-white cursor-pointer"
+                    >
+                      Change Battleground
+                    </Button>
+                  )}
                   <Button
                     variant="destructive"
                     className="hover:bg-red-500 cursor-pointer"

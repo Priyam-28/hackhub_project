@@ -46,7 +46,7 @@ export default function Home() {
 
           {/* Multi-step Form */}
           <div className="mt-auto">
-            {account && (
+            {typeof window !== "undefined" && account && (
               <>
                 <h2 className="text-white text-xl mb-4">Name</h2>
                 <Input
@@ -65,7 +65,9 @@ export default function Home() {
               </>
             )}
             <div className="mt-auto flex justify-center">
-              <ConnectEmbed chain={chain} client={client} />
+              {typeof window !== "undefined" && (
+                <ConnectEmbed chain={chain} client={client} />
+              )}
             </div>
           </div>
         </div>
