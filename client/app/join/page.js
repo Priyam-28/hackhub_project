@@ -23,9 +23,14 @@ export default function JoinBattle() {
   const [battles, setBattles] = useState([]);
   const [battleId, setBattleId] = useState("");
   const [waiting, setWaiting] = useState(false);
+  const [connectedPlayers,setConnectedPlayers]=useState([]);
 
   const account = useActiveAccount();
   const router = useRouter();
+
+  const [currentBattle,setCurrentBattle]="";
+
+  const zeroAddress = "0x0000000000000000000000000000000000000000";
 
   const client = createThirdwebClient({
     clientId: "b1a65889f5717828368b6a3046f24673",
@@ -34,9 +39,50 @@ export default function JoinBattle() {
   const contract = getContract({
     client: client,
     chain: sepolia,
-    address: "0xFaF4aE867C9d3888d9f2538C9B0f1022dCC80943",
+    address: "0x62A42Aee8f3610F606834f02fB3F9080B08EedA0",
     abi: gameLogicABI,
   });
+
+  const pushConnectedUser = async () => {
+    if (!account?.address) return;
+    
+    try {
+      const getId=await readContract({
+        contract,
+        method:"gameIdByName",
+        params:["test2"]
+      })
+      console.log(getId);
+      if(getId){
+        const data=await readContract({
+          contract,
+          method:"getArenaDetails",
+          params:["1"]
+        })
+        setConnectedPlayers(data[1]);
+      }
+      //console.log(data[1]);
+      
+      // console.log(data[1]);
+      // setConnectedPlayers(data[1]);
+    }
+    catch (error) {
+      console.error("Error pushing connected user:", error);
+    }
+  }
+
+
+  useEffect(() => {
+    // Check if every address in the array is NOT equal to zero address
+    if (connectedPlayers.length > 0 && connectedPlayers.every(addr => addr !== zeroAddress)) {
+      router.push('/battle/1');
+    }
+    
+  }, [connectedPlayers])
+
+  useEffect(() => {
+    pushConnectedUser()
+  }, [account?.address]);
 
   const fetchBattles = async () => {
     try {
@@ -124,6 +170,7 @@ export default function JoinBattle() {
 
   const JoinBattle = (battle) => {
     console.log(battle);
+    setCurrentBattle(battle);
     return prepareContractCall({
       contract,
       method: "joinGame",
@@ -139,8 +186,8 @@ export default function JoinBattle() {
     });
   };
 
-  console.log(waiting);
-  console.log(selectedAgent);
+  //console.log(waiting);
+  //sconsole.log(selectedAgent);
 
   // Agent selection view (before confirmation)
   if (!confirmed) {
