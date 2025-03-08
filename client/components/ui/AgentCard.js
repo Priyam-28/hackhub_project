@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 const AgentCard = ({ card, title, cardRef, restStyles, cardDef, image }) => {
-  const tie = (title || "").toUpperCase();
+  const tie = (title || "");
 
   return (
     <div>
