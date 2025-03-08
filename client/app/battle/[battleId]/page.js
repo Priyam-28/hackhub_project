@@ -368,7 +368,15 @@ const BattleArena = () => {
         {/* Market Tab */}
         <TabsContent value="market" className="w-full h-full p-0">
           <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-            <h1 className="text-white text-4xl">Market</h1>
+            {/* <h1 className="text-white text-4xl">Market</h1> */}
+            <iframe
+              src="http://localhost:8501"
+              width="100%"
+              height="600"
+              frameBorder="0"
+              style={{ border: "none" }}
+              allowFullScreen
+            ></iframe>
           </div>
         </TabsContent>
       </Tabs>
