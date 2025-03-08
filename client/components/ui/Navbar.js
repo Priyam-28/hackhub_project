@@ -18,10 +18,15 @@ import { useState, useEffect } from "react";
 import { sepolia } from "thirdweb/chains";
 import { testABI } from "../../lib/contractABI";
 import toast from "react-hot-toast";
+import { usePathname } from "next/navigation";
 
 const Navbar = () => {
   const [balance, setBalance] = useState("0");
   const account = useActiveAccount();
+  const pathname = usePathname();
+  if (pathname.startsWith("/battle")) {
+    console.log("Battle page");
+  }
 
   const client = createThirdwebClient({
     clientId: "b1a65889f5717828368b6a3046f24673",
@@ -91,7 +96,15 @@ const Navbar = () => {
             </TransactionButton>
           </div>
         )}
-        <ConnectButton client={client} chain={chain} />
+        <div
+          className={
+            pathname.startsWith("/battle")
+              ? "pointer-events-none opacity-50"
+              : ""
+          }
+        >
+          <ConnectButton client={client} chain={chain} />
+        </div>
       </div>
     </nav>
   );

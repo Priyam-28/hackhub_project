@@ -7,9 +7,14 @@ import { Input } from "../../components/ui/input";
 import { useRouter } from "next/navigation";
 import AgentCard from "../../components/ui/AgentCard";
 import { TransactionButton, useActiveAccount } from "thirdweb/react";
-import { readContract,getContract,createThirdwebClient , prepareContractCall } from "thirdweb";
+import {
+  readContract,
+  getContract,
+  createThirdwebClient,
+  prepareContractCall,
+} from "thirdweb";
 import { sepolia } from "thirdweb/chains";
-import {gameLogicABI} from '../../lib/gameLogicABI';
+import { gameLogicABI } from "../../lib/gameLogicABI";
 import toast from "react-hot-toast";
 
 export default function JoinBattle() {
@@ -19,7 +24,7 @@ export default function JoinBattle() {
   const [battleId, setBattleId] = useState("");
   const [waiting, setWaiting] = useState(false);
 
-  const account=useActiveAccount();
+  const account = useActiveAccount();
   const router = useRouter();
 
   const client = createThirdwebClient({
@@ -33,29 +38,61 @@ export default function JoinBattle() {
     abi: gameLogicABI,
   });
 
-  const fetchBattles=async()=>{
-     try{
-      if(!account?.address) return;
-      //console.log(gameLogicABI);
-      const battles=await readContract({
+  const fetchBattles = async () => {
+    try {
+      if (!account?.address) return;
+      const battles = await readContract({
         contract,
-        method:"getExistingBattles",
-        params:[]
-      })
-      //console.log("Battles:",battles);
-        setBattles(battles);
-     }
-     catch(error){
-       console.error("Error fetching battles:",error);
-     }
-
-  }
+        method: "getExistingBattles",
+        params: [],
+      });
+      setBattles(battles);
+    } catch (error) {
+      console.error("Error fetching battles:", error);
+    }
+  };
 
   useEffect(() => {
     fetchBattles();
   }, [account?.address]);
-    
 
+  // Load localStorage states on mount
+  useEffect(() => {
+    const storedWaiting = localStorage.getItem("waiting");
+    if (storedWaiting) {
+      setWaiting(storedWaiting === "true");
+    }
+    const storedAgent = localStorage.getItem("selectedAgent");
+    if (storedAgent) {
+      try {
+        setSelectedAgent(JSON.parse(storedAgent));
+      } catch (error) {
+        console.error("Error parsing selectedAgent from localStorage", error);
+      }
+    }
+    const storedConfirmed = localStorage.getItem("confirmed");
+    if (storedConfirmed) {
+      setConfirmed(storedConfirmed === "true");
+    }
+  }, []);
+
+  // Persist waiting state to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem("waiting", waiting ? "true" : "false");
+  }, [waiting]);
+
+  // Persist selectedAgent state to localStorage when it changes
+  useEffect(() => {
+    if (selectedAgent) {
+      localStorage.setItem("selectedAgent", JSON.stringify(selectedAgent));
+    } else {
+      localStorage.removeItem("selectedAgent");
+    }
+  }, [selectedAgent]);
+
+  useEffect(() => {
+    localStorage.setItem("confirmed", confirmed ? "true" : "false");
+  }, [confirmed]);
 
   // Agents array with extra properties for the AgentCard
   const agents = [
@@ -85,35 +122,25 @@ export default function JoinBattle() {
     },
   ];
 
-  const JoinBattle=(battle)=>{
+  const JoinBattle = (battle) => {
     console.log(battle);
     return prepareContractCall({
       contract,
-      method:"joinGame",
-      params:[battle]
-    })
-  }
+      method: "joinGame",
+      params: [battle],
+    });
+  };
 
-  const handleCreateBattle=async(battleId)=>{
+  const handleCreateBattle = async (battleId) => {
     return prepareContractCall({
       contract,
-      method:"createGame",
-      params:[battleId]
-    })
-  }
+      method: "createGame",
+      params: [battleId],
+    });
+  };
 
-  // const handleCreateBattle = () => {
-  //   if (battleId) {
-  //     setWaiting(true);
-  //     setTimeout(() => {
-  //       router.push("/battle");
-  //     }, 3000);
-  //   } else {
-  //     toast.error("Please enter a valid battle ID");
-  //   }
-  // };
-
-  console.log("Battles:",battles);
+  console.log(waiting);
+  console.log(selectedAgent);
 
   // Agent selection view (before confirmation)
   if (!confirmed) {
@@ -189,9 +216,9 @@ export default function JoinBattle() {
 
   // Once the selection is confirmed, show the Join a Battle component.
   return (
-    <main className="w-full flex min-h-[calc(100vh-4.5rem)] bg-[#0e0e10]">
+    <main className="relative w-full flex min-h-[calc(100vh-4.5rem)] bg-[#0e0e10]">
       {waiting && (
-        <div className="absolute top-0 right-0 w-full h-full backdrop-blur-md p-8 z-30 flex flex-col items-center justify-center gap-8">
+        <div className="absolute inset-0 backdrop-blur-lg p-8 z-30 flex flex-col items-center justify-center gap-8">
           <h1 className="text-white text-4xl font-bold leading-tight">
             Waiting for other players...
           </h1>
@@ -215,7 +242,9 @@ export default function JoinBattle() {
           <div className="flex flex-col gap-2">
             <p className="text-[#4a9eff] text-xl">
               You have selected:{" "}
-              <span className="font-bold text-purple-600">{selectedAgent.name}</span>
+              <span className="font-bold text-purple-600">
+                {selectedAgent.name}
+              </span>
             </p>
 
             <p className="text-[#4a9eff] text-xl">
@@ -226,25 +255,28 @@ export default function JoinBattle() {
           <div className="flex flex-col gap-4">
             <h2 className="text-white text-xl">Available Battles:</h2>
             {battles.length > 0 ? (
-                <div className="flex flex-col gap-4">
-                  {battles.map((battle) => (
-                    <div
-                      key={battle}
-                      className="flex items-center gap-4 cursor-pointer w-full max-w-md justify-between"
-                      //onClick={() => router.push(`/battle/${battle}`)}
+              <div className="flex flex-col gap-4">
+                {battles.map((battle) => (
+                  <div
+                    key={battle}
+                    className="flex items-center gap-4 cursor-pointer w-full max-w-md justify-between"
+                    //onClick={() => router.push(`/battle/${battleId}`)}
+                  >
+                    <p className="text-lg font-light text-white">
+                      Battle ID: {battle}
+                    </p>
+                    <TransactionButton
+                      transaction={() => JoinBattle(battle)}
+                      onTransactionConfirmed={() => {
+                        toast.success("Battle Joined");
+                        setWaiting(true);
+                      }}
                     >
-                      <p className="text-lg font-light text-white">
-                        Battle Name: {battle}
-                      </p>
-                      {/* <Button className="bg-[#7F46F0] hover:bg-[#7F46F0]/90 text-white px-8 py-6 rounded-md text-lg cursor-pointer">
-                        Join
-                      </Button> */}
-                      <TransactionButton transaction={()=>JoinBattle(battle)} >
-                        Join
-                      </TransactionButton>
-                    </div>
-                  ))}
+                      Join
+                    </TransactionButton>
                   </div>
+                ))}
+              </div>
             ) : (
               <div className="flex items-center">
                 <p className="text-lg font-light text-white">
@@ -265,11 +297,15 @@ export default function JoinBattle() {
                 onChange={(e) => setBattleId(e.target.value)}
               />
               {battleId && (
-                <TransactionButton transaction={()=>handleCreateBattle(battleId)} onTransactionConfirmed={()=>{
-                  toast.success("Battle Created");
-                  fetchBattles();
-                  setBattleId("");
-                }}>
+                <TransactionButton
+                  transaction={() => handleCreateBattle(battleId)}
+                  onTransactionConfirmed={() => {
+                    toast.success("Battle Created");
+                    setWaiting(true);
+                    fetchBattles();
+                    setBattleId("");
+                  }}
+                >
                   Create Button
                 </TransactionButton>
               )}
