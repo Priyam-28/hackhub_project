@@ -21,10 +21,10 @@ export default function JoinBattle() {
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [confirmed, setConfirmed] = useState(false);
   const [battles, setBattles] = useState([]);
-  const [battleId, setBattleId] = useState("");  // for creating battle
+  const [battleId, setBattleId] = useState(""); // for creating battle
   const [waiting, setWaiting] = useState(false);
-  const [connectedPlayers, setConnectedPlayers] = useState([]);   // connected players list 
-  const [pushVal, setPushVal] = useState(false);  // is false 
+  const [connectedPlayers, setConnectedPlayers] = useState([]); // connected players list
+  const [pushVal, setPushVal] = useState(false); // is false
 
   const [uint, setUint] = useState(0); // uint is id of the battle
 
@@ -44,14 +44,12 @@ export default function JoinBattle() {
     abi: gameLogicABI,
   });
 
-
   const JoinBattle = (battle) => {
-    // console.log(battle);
     return prepareContractCall({
       contract,
       method: "joinGame",
       params: [battle],
-    })
+    });
   };
 
   const handleCreateBattle = async (battleId) => {
@@ -60,52 +58,10 @@ export default function JoinBattle() {
       method: "createGame",
       params: [battleId],
     });
-
   };
 
-  const pushConnectedUser = async () => {
-    if (!account?.address) return;
-
-    try {
-      const getId = await readContract({
-        contract,
-        method: "gameIdByName",
-        params: ["test3"],
-      });
-      // console.log("getid: ", getId);
-      // console.log(typeof getId);
-      setUint(getId);
-
-      router.push(`/battle/${getId}`);
-     
-        const data = await readContract({
-          contract,
-          method: "getArenaDetails",
-          params: [getId],
-        });
-        
-        setConnectedPlayers(data[1]);
-        setPushVal(data[3]);
-        
-      //console.log(data[1]);
-
-      // console.log(data[1]);
-      // setConnectedPlayers(data[1]);
-    } catch (error) {
-      console.error("Error pushing connected user:", error);
-    }
-  };
-
-  useEffect(() => {
-    console.log(connectedPlayers);
-    console.log(pushVal);
-    console.log(uint);
-  }, [connectedPlayers,pushVal,uint]);
-
-
-  useEffect(() => {
-    pushConnectedUser();
-  }, [account?.address]);
+  // Removed this function as it was causing the hardcoded battle ID issue
+  // The navigation to battles is now managed directly in the transaction confirmations
 
   const fetchBattles = async () => {
     try {
@@ -163,14 +119,30 @@ export default function JoinBattle() {
     localStorage.setItem("confirmed", confirmed ? "true" : "false");
   }, [confirmed]);
 
-  const pushAfterCreation = async(battleId) => {
-    const idd= await readContract({
-      contract,
-      method: "gameIdByName",
-      params: [battleId],
-    });
-    router.push(`/battle/${idd}`);
-  }
+  const pushAfterCreation = async (battleId) => {
+    try {
+      // const idd = await readContract({
+      //   contract,
+      //   method: "gameIdByName",
+      //   params: [battleId],
+      // });
+
+      router.push(`/battle/${battleId}`);
+    } catch (error) {
+      console.error("Error navigating to battle:", error);
+      toast.error("Failed to navigate to battle");
+    }
+  };
+
+  const joinBattleAndNavigate = async (battle) => {
+    try {
+      await JoinBattle(battle);
+      router.push(`/battle/${battle}`);
+    } catch (error) {
+      console.error("Error joining battle:", error);
+      toast.error("Failed to join battle");
+    }
+  };
 
   // Agents array with extra properties for the AgentCard
   const agents = [
@@ -199,10 +171,6 @@ export default function JoinBattle() {
       cardDef: 7,
     },
   ];
-
- 
-
-  //sconsole.log(selectedAgent);
 
   // Agent selection view (before confirmation)
   if (!confirmed) {
@@ -322,7 +290,6 @@ export default function JoinBattle() {
                   <div
                     key={battle}
                     className="flex items-center gap-4 cursor-pointer w-full max-w-md justify-between"
-                    // onClick={() => router.push(`/battle/${battleId}`)}
                   >
                     <p className="text-lg font-light text-white">
                       Battle ID: {battle}
@@ -332,6 +299,7 @@ export default function JoinBattle() {
                       onTransactionConfirmed={() => {
                         toast.success("Battle Joined");
                         setWaiting(true);
+                        router.push(`/battle/${battle}`);
                       }}
                     >
                       Join
@@ -363,13 +331,12 @@ export default function JoinBattle() {
                   transaction={() => handleCreateBattle(battleId)}
                   onTransactionConfirmed={() => {
                     toast.success("Battle Created");
-                    // setWaiting(true);
                     fetchBattles();
                     pushAfterCreation(battleId);
                     setBattleId("");
                   }}
                 >
-                  Create Button
+                  Create Battle
                 </TransactionButton>
               )}
             </div>
