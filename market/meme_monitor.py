@@ -162,8 +162,8 @@ class MemeMonitor(discord.Client):
 
 if __name__ == "__main__":
     # Configuration (should be loaded from env vars or config file in production)
-    DISCORD_TOKEN = "DISCORD_BOT_TOKEN"
-    SERVER_ID = 123  # Replace with your server ID
+    DISCORD_TOKEN = "MTM0NjUwMTk4MzczNzA4NTk5Mw.G13qEN.VkCV4GgILcf6dkTCqOFw1qY6ubqV7nAyhNXAfE"
+    SERVER_ID = 1346527621579800676  # Replace with your server ID
     
     # Create and start the meme monitor
     monitor = MemeMonitor(DISCORD_TOKEN, SERVER_ID)
