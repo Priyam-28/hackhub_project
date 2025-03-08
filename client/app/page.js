@@ -4,10 +4,19 @@ import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ConnectEmbed, TransactionButton, useActiveAccount } from "thirdweb/react";
+import {
+  ConnectEmbed,
+  TransactionButton,
+  useActiveAccount,
+} from "thirdweb/react";
 import { chain } from "../web3/chain";
 import Overlay from "../components/ui/Overlay";
-import { createThirdwebClient, prepareContractCall, readContract, getContract } from "thirdweb";
+import {
+  createThirdwebClient,
+  prepareContractCall,
+  readContract,
+  getContract,
+} from "thirdweb";
 import { namesABI } from "../lib/namesABI";
 import { sepolia } from "thirdweb/chains";
 
@@ -40,7 +49,7 @@ export default function Home() {
           params: [account.address],
         });
 
-        console.log("Fetched Name:", data);
+        // console.log("Fetched Name:", data);
         setFetchedName(data);
 
         if (data !== "") {
@@ -96,7 +105,8 @@ export default function Home() {
 
           {/* Subtext */}
           <p className="text-[#4a9eff] text-xl mb-8">
-            Connect your wallet to start playing <br /> the ultimate AI Agents Trading Clash
+            Connect your wallet to start playing <br /> the ultimate AI Agents
+            Trading Clash
           </p>
 
           {/* Multi-step Form */}
@@ -111,11 +121,15 @@ export default function Home() {
                   onChange={(e) => setName(e.target.value)}
                   className="bg-[#13131a] border-none text-gray-300 h-14 mb-6 w-full max-w-md"
                 />
-                <TransactionButton transaction={() => registerAdd(name)}>Register</TransactionButton>
+                <TransactionButton transaction={() => registerAdd(name)}>
+                  Register
+                </TransactionButton>
               </>
             )}
             <div className="mt-auto flex justify-center">
-              {typeof window !== "undefined" && <ConnectEmbed chain={chain} client={client} />}
+              {typeof window !== "undefined" && (
+                <ConnectEmbed chain={chain} client={client} />
+              )}
             </div>
           </div>
         </div>
