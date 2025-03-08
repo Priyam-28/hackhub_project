@@ -5,15 +5,15 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "../../components/ui/tabs";
-import { Button } from "../../components/ui/button";
-import Leaderboard from "../../components/ui/LeaderBoard";
-import AgentCard from "../../components/ui/AgentCard";
+} from "../../../components/ui/tabs";
+import { Button } from "../../../components/ui/button";
+import Leaderboard from "../../../components/ui/LeaderBoard";
+import AgentCard from "../../../components/ui/AgentCard";
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-} from "../../components/ui/popover";
+} from "../../../components/ui/popover";
 import toast from "react-hot-toast";
 
 const AgentCardWithPopover = ({ agent, otherAgents }) => {
