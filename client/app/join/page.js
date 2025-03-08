@@ -215,7 +215,7 @@ export default function JoinBattle() {
           <div className="flex flex-col gap-2">
             <p className="text-[#4a9eff] text-xl">
               You have selected:{" "}
-              <span className="font-bold">{selectedAgent.name}</span>
+              <span className="font-bold text-purple-600">{selectedAgent.name}</span>
             </p>
 
             <p className="text-[#4a9eff] text-xl">
@@ -234,7 +234,7 @@ export default function JoinBattle() {
                       //onClick={() => router.push(`/battle/${battle}`)}
                     >
                       <p className="text-lg font-light text-white">
-                        Battle ID: {battle}
+                        Battle Name: {battle}
                       </p>
                       {/* <Button className="bg-[#7F46F0] hover:bg-[#7F46F0]/90 text-white px-8 py-6 rounded-md text-lg cursor-pointer">
                         Join
@@ -254,7 +254,7 @@ export default function JoinBattle() {
             )}
             <Separator className="my-6 bg-gray-600 w-3" />
             <div className="flex flex-col items-start gap-4">
-              <p className="!text-purple-600 text-lg no-underline hover:text-purple-500">
+              <p className="!text-purple-600 text-lg no-underline hover:text-purple-500 font-semibold">
                 Or Create a new Battle
               </p>
               <Input
