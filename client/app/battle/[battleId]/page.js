@@ -28,15 +28,14 @@ import { useActiveAccount } from "thirdweb/react";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 
+
 const AgentCardWithPopover = ({ agent, otherAgents }) => {
   const [popoverContent, setPopoverContent] = useState("menu");
   const [open, setOpen] = useState(false);
   const [winner, setWinner] = useState(true);
   const router = useRouter();
 
-  const { id } = useParams();
-  console.log("BattleId: ", id);
-
+  const [address, setAddress] = useState([]);
   const account = useActiveAccount();
 
   const zeroAddress = "0x0000000000000000000000000000000000000000";
@@ -62,10 +61,13 @@ const AgentCardWithPopover = ({ agent, otherAgents }) => {
     const data = await readContract({
       contract,
       method: "getArenaDetails",
-      params: [id],
+      params: ["2"],
     });
-    console.log(data[3]);
+    //console.log(data[3]);
     setWinner(data[3]);
+    
+    setAddress(Object.values(data[1]));
+    //console.log(data[1]);
   };
 
   useEffect(() => {
@@ -84,6 +86,11 @@ const AgentCardWithPopover = ({ agent, otherAgents }) => {
     setPopoverContent("menu");
   };
 
+  useEffect(()=>{
+    console.log(address)
+    console.log(typeof address)
+  },[address])
+
   return (
     <Popover
       open={open}
@@ -101,6 +108,16 @@ const AgentCardWithPopover = ({ agent, otherAgents }) => {
             cardDef={agent.cardDef}
             image={agent.image}
           />
+          {/* {address.slice(0,4).map((title, index) => (
+            <AgentCard
+              key={index} // Ensure unique key for React reconciliation
+              card={agent.card} // Ensure you get the correct agent data
+              title={title} // Mapping address as title
+              cardRef={null}
+              cardDef={agent.cardDef}
+              image={agent.image}
+            />
+          ))} */}
         </div>
       </PopoverTrigger>
       <PopoverContent className="bg-gray-900 border border-blue-600 p-4 rounded-lg shadow-lg max-w-xs">
