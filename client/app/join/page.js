@@ -19,171 +19,188 @@ import toast from "react-hot-toast";
 
 export default function JoinBattle() {
   const [selectedAgent, setSelectedAgent] = useState(null);
-const [confirmed, setConfirmed] = useState(false);
-const [battles, setBattles] = useState([]);
-const [battleId, setBattleId] = useState("");
-const [waiting, setWaiting] = useState(false);
-const [connectedPlayers, setConnectedPlayers] = useState([]);
-const [pushVal, setPushVal] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
+  const [battles, setBattles] = useState([]);
+  const [battleId, setBattleId] = useState("");  // for creating battle
+  const [waiting, setWaiting] = useState(false);
+  const [connectedPlayers, setConnectedPlayers] = useState([]);   // connected players list 
+  const [pushVal, setPushVal] = useState(false);  // is false 
 
-const account = useActiveAccount();
-const router = useRouter();
+  const [uint, setUint] = useState(0); // uint is id of the battle
 
-const [currentBattle, setCurrentBattle] = useState("");
+  const account = useActiveAccount();
+  const router = useRouter();
 
-const zeroAddress = "0x0000000000000000000000000000000000000000";
+  const zeroAddress = "0x0000000000000000000000000000000000000000";
 
-const client = createThirdwebClient({
-  clientId: "b1a65889f5717828368b6a3046f24673",
-});
+  const client = createThirdwebClient({
+    clientId: "b1a65889f5717828368b6a3046f24673",
+  });
 
-const contract = getContract({
-  client: client,
-  chain: sepolia,
-  address: "0x62A42Aee8f3610F606834f02fB3F9080B08EedA0",
-  abi: gameLogicABI,
-});
+  const contract = getContract({
+    client: client,
+    chain: sepolia,
+    address: "0x62A42Aee8f3610F606834f02fB3F9080B08EedA0",
+    abi: gameLogicABI,
+  });
 
-const pushConnectedUser = async () => {
-  if (!account?.address) return;
 
-  try {
-    const getId = await readContract({
+  const JoinBattle = (battle) => {
+    // console.log(battle);
+    return prepareContractCall({
       contract,
-      method: "gameIdByName",
-      params: [battleId],  // 🔥 Use dynamic battle ID instead of hardcoded "test"
+      method: "joinGame",
+      params: [battle],
+    })
+  };
+
+  const handleCreateBattle = async (battleId) => {
+    return prepareContractCall({
+      contract,
+      method: "createGame",
+      params: [battleId],
     });
 
-    if (getId) {
-      const data = await readContract({
+  };
+
+  const pushConnectedUser = async () => {
+    if (!account?.address) return;
+
+    try {
+      const getId = await readContract({
         contract,
-        method: "getArenaDetails",
-        params: [getId], // 🔥 Use dynamic game ID
+        method: "gameIdByName",
+        params: ["test3"],
       });
+      // console.log("getid: ", getId);
+      // console.log(typeof getId);
+      setUint(getId);
 
-      setConnectedPlayers(data[1]);
-      setPushVal(data[3]);
+      router.push(`/battle/${getId}`);
+     
+        const data = await readContract({
+          contract,
+          method: "getArenaDetails",
+          params: [getId],
+        });
+        
+        setConnectedPlayers(data[1]);
+        setPushVal(data[3]);
+        
+      //console.log(data[1]);
 
-      if (data[3] === zeroAddress) {
-        router.push(`/battle/${data[0]}`);
+      // console.log(data[1]);
+      // setConnectedPlayers(data[1]);
+    } catch (error) {
+      console.error("Error pushing connected user:", error);
+    }
+  };
+
+  useEffect(() => {
+    console.log(connectedPlayers);
+    console.log(pushVal);
+    console.log(uint);
+  }, [connectedPlayers,pushVal,uint]);
+
+
+  useEffect(() => {
+    pushConnectedUser();
+  }, [account?.address]);
+
+  const fetchBattles = async () => {
+    try {
+      if (!account?.address) return;
+      const battles = await readContract({
+        contract,
+        method: "getExistingBattles",
+        params: [],
+      });
+      setBattles(battles);
+    } catch (error) {
+      console.error("Error fetching battles:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBattles();
+  }, [account?.address]);
+
+  // Load localStorage states on mount
+  useEffect(() => {
+    const storedWaiting = localStorage.getItem("waiting");
+    if (storedWaiting) {
+      setWaiting(storedWaiting === "true");
+    }
+    const storedAgent = localStorage.getItem("selectedAgent");
+    if (storedAgent) {
+      try {
+        setSelectedAgent(JSON.parse(storedAgent));
+      } catch (error) {
+        console.error("Error parsing selectedAgent from localStorage", error);
       }
     }
-  } catch (error) {
-    console.error("Error pushing connected user:", error);
-  }
-};
-
-useEffect(() => {
-  pushConnectedUser();
-}, [account?.address, battleId]); // 🔥 Add battleId dependency
-
-const fetchBattles = async () => {
-  try {
-    if (!account?.address) return;
-    const battles = await readContract({
-      contract,
-      method: "getExistingBattles",
-      params: [],
-    });
-    setBattles(battles);
-  } catch (error) {
-    console.error("Error fetching battles:", error);
-  }
-};
-
-useEffect(() => {
-  fetchBattles();
-}, [account?.address]);
-
-// Load localStorage states on mount
-useEffect(() => {
-  const storedWaiting = localStorage.getItem("waiting");
-  if (storedWaiting) {
-    setWaiting(storedWaiting === "true");
-  }
-  const storedAgent = localStorage.getItem("selectedAgent");
-  if (storedAgent) {
-    try {
-      setSelectedAgent(JSON.parse(storedAgent));
-    } catch (error) {
-      console.error("Error parsing selectedAgent from localStorage", error);
+    const storedConfirmed = localStorage.getItem("confirmed");
+    if (storedConfirmed) {
+      setConfirmed(storedConfirmed === "true");
     }
-  }
-  const storedConfirmed = localStorage.getItem("confirmed");
-  if (storedConfirmed) {
-    setConfirmed(storedConfirmed === "true");
-  }
-}, []);
+  }, []);
 
-// Persist states to localStorage
-useEffect(() => {
-  localStorage.setItem("waiting", JSON.stringify(waiting));
-  localStorage.setItem("confirmed", JSON.stringify(confirmed));
-  selectedAgent
-    ? localStorage.setItem("selectedAgent", JSON.stringify(selectedAgent))
-    : localStorage.removeItem("selectedAgent");
-}, [waiting, confirmed, selectedAgent]);
+  // Persist waiting state to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem("waiting", waiting ? "true" : "false");
+  }, [waiting]);
 
-// Agents array with extra properties for the AgentCard
-const agents = [
-  {
-    id: 1,
-    name: "Risky Ross",
-    description: "Powerful AI with strategic insights.",
-    image: "/Ace.png",
-    card: 10,
-    cardDef: 5,
-  },
-  {
-    id: 2,
-    name: "Speedy Furiosa",
-    description: "Fast and agile for quick battles.",
-    image: "/Furiosa.png",
-    card: 9,
-    cardDef: 6,
-  },
-  {
-    id: 3,
-    name: "Balanced Bob",
-    description: "Balanced and resilient in tough fights.",
-    image: "/Katara.png",
-    card: 11,
-    cardDef: 7,
-  },
-];
+  // Persist selectedAgent state to localStorage when it changes
+  useEffect(() => {
+    if (selectedAgent) {
+      localStorage.setItem("selectedAgent", JSON.stringify(selectedAgent));
+    } else {
+      localStorage.removeItem("selectedAgent");
+    }
+  }, [selectedAgent]);
 
-const JoinBattle = async (battle) => {
-  setCurrentBattle(battle);
-  try {
-    const tx = await sendTransaction(
-      prepareContractCall({
-        contract,
-        method: "joinGame",
-        params: [battle], // 🔥 Dynamic battle ID
-      })
-    );
-    await tx.wait();
-    console.log("Joined battle:", tx);
-  } catch (error) {
-    console.error("Error joining battle:", error);
+  useEffect(() => {
+    localStorage.setItem("confirmed", confirmed ? "true" : "false");
+  }, [confirmed]);
+
+  const pushAfterCreation = async(battleId) => {
+    const idd= await readContract({
+      contract,
+      method: "gameIdByName",
+      params: [battleId],
+    });
+    router.push(`/battle/${idd}`);
   }
-};
 
-const handleCreateBattle = async () => {
-  try {
-    const tx = await sendTransaction(
-      prepareContractCall({
-        contract,
-        method: "createGame",
-        params: [battleId], // 🔥 Use dynamic battleId from state
-      })
-    );
-    await tx.wait();
-    console.log("Battle created:", tx);
-  } catch (error) {
-    console.error("Error creating battle:", error);
-  }
-};
+  // Agents array with extra properties for the AgentCard
+  const agents = [
+    {
+      id: 1,
+      name: "Risky Ross",
+      description: "Powerful AI with strategic insights.",
+      image: "/Ace.png",
+      card: 10,
+      cardDef: 5,
+    },
+    {
+      id: 2,
+      name: "Speedy Furiosa",
+      description: "Fast and agile for quick battles.",
+      image: "/Furiosa.png",
+      card: 9,
+      cardDef: 6,
+    },
+    {
+      id: 3,
+      name: "Balanced Bob",
+      description: "Balanced and resilient in tough fights.",
+      image: "/Katara.png",
+      card: 11,
+      cardDef: 7,
+    },
+  ];
+
+ 
 
   //sconsole.log(selectedAgent);
 
@@ -305,7 +322,7 @@ const handleCreateBattle = async () => {
                   <div
                     key={battle}
                     className="flex items-center gap-4 cursor-pointer w-full max-w-md justify-between"
-                    //onClick={() => router.push(`/battle/${battleId}`)}
+                    // onClick={() => router.push(`/battle/${battleId}`)}
                   >
                     <p className="text-lg font-light text-white">
                       Battle ID: {battle}
@@ -346,8 +363,9 @@ const handleCreateBattle = async () => {
                   transaction={() => handleCreateBattle(battleId)}
                   onTransactionConfirmed={() => {
                     toast.success("Battle Created");
-                    setWaiting(true);
+                    // setWaiting(true);
                     fetchBattles();
+                    pushAfterCreation(battleId);
                     setBattleId("");
                   }}
                 >

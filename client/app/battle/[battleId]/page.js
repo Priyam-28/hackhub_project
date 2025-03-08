@@ -62,7 +62,7 @@ const AgentCardWithPopover = ({ agent, otherAgents }) => {
     const data = await readContract({
       contract,
       method: "getArenaDetails",
-      params: ["1"],
+      params: [id],
     });
     console.log(data[3]);
     setWinner(data[3]);
@@ -72,12 +72,6 @@ const AgentCardWithPopover = ({ agent, otherAgents }) => {
     arenaDetails();
   }, [account?.address]);
 
-  useEffect(() => {
-    if (winner) {
-      //toast.success(`The winner is ${winner}`);
-      router.push("/join");
-    }
-  }, [account?.address]);
 
   const sabotageAgent = (targetAgent) => {
     toast.success(`Sabotaging ${targetAgent.name}!`);
