@@ -7,9 +7,14 @@ import { Input } from "../../components/ui/input";
 import { useRouter } from "next/navigation";
 import AgentCard from "../../components/ui/AgentCard";
 import { TransactionButton, useActiveAccount } from "thirdweb/react";
-import { readContract,getContract,createThirdwebClient , prepareContractCall } from "thirdweb";
+import {
+  readContract,
+  getContract,
+  createThirdwebClient,
+  prepareContractCall,
+} from "thirdweb";
 import { sepolia } from "thirdweb/chains";
-import {gameLogicABI} from '../../lib/gameLogicABI';
+import { gameLogicABI } from "../../lib/gameLogicABI";
 import toast from "react-hot-toast";
 
 export default function JoinBattle() {
@@ -19,7 +24,7 @@ export default function JoinBattle() {
   const [battleId, setBattleId] = useState("");
   const [waiting, setWaiting] = useState(false);
 
-  const account=useActiveAccount();
+  const account = useActiveAccount();
   const router = useRouter();
 
   const client = createThirdwebClient({
@@ -33,29 +38,25 @@ export default function JoinBattle() {
     abi: gameLogicABI,
   });
 
-  const fetchBattles=async()=>{
-     try{
-      if(!account?.address) return;
+  const fetchBattles = async () => {
+    try {
+      if (!account?.address) return;
       //console.log(gameLogicABI);
-      const battles=await readContract({
+      const battles = await readContract({
         contract,
-        method:"getExistingBattles",
-        params:[]
-      })
+        method: "getExistingBattles",
+        params: [],
+      });
       //console.log("Battles:",battles);
-        setBattles(battles);
-     }
-     catch(error){
-       console.error("Error fetching battles:",error);
-     }
-
-  }
+      setBattles(battles);
+    } catch (error) {
+      console.error("Error fetching battles:", error);
+    }
+  };
 
   useEffect(() => {
     fetchBattles();
   }, [account?.address]);
-    
-
 
   // Agents array with extra properties for the AgentCard
   const agents = [
@@ -85,22 +86,22 @@ export default function JoinBattle() {
     },
   ];
 
-  const JoinBattle=(battle)=>{
+  const JoinBattle = (battle) => {
     console.log(battle);
     return prepareContractCall({
       contract,
-      method:"joinGame",
-      params:[battle]
-    })
-  }
+      method: "joinGame",
+      params: [battle],
+    });
+  };
 
-  const handleCreateBattle=async(battleId)=>{
+  const handleCreateBattle = async (battleId) => {
     return prepareContractCall({
       contract,
-      method:"createGame",
-      params:[battleId]
-    })
-  }
+      method: "createGame",
+      params: [battleId],
+    });
+  };
 
   // const handleCreateBattle = () => {
   //   if (battleId) {
@@ -113,7 +114,7 @@ export default function JoinBattle() {
   //   }
   // };
 
-  console.log("Battles:",battles);
+  console.log("Battles:", battles);
 
   // Agent selection view (before confirmation)
   if (!confirmed) {
@@ -226,25 +227,30 @@ export default function JoinBattle() {
           <div className="flex flex-col gap-4">
             <h2 className="text-white text-xl">Available Battles:</h2>
             {battles.length > 0 ? (
-                <div className="flex flex-col gap-4">
-                  {battles.map((battle) => (
-                    <div
-                      key={battle}
-                      className="flex items-center gap-4 cursor-pointer w-full max-w-md justify-between"
-                      //onClick={() => router.push(`/battle/${battle}`)}
-                    >
-                      <p className="text-lg font-light text-white">
-                        Battle ID: {battle}
-                      </p>
-                      {/* <Button className="bg-[#7F46F0] hover:bg-[#7F46F0]/90 text-white px-8 py-6 rounded-md text-lg cursor-pointer">
+              <div className="flex flex-col gap-4">
+                {battles.map((battle) => (
+                  <div
+                    key={battle}
+                    className="flex items-center gap-4 cursor-pointer w-full max-w-md justify-between"
+                    //onClick={() => router.push(`/battle/${battle}`)}
+                  >
+                    <p className="text-lg font-light text-white">
+                      Battle ID: {battle}
+                    </p>
+                    {/* <Button className="bg-[#7F46F0] hover:bg-[#7F46F0]/90 text-white px-8 py-6 rounded-md text-lg cursor-pointer">
                         Join
                       </Button> */}
-                      <TransactionButton transaction={()=>JoinBattle(battle)} >
-                        Join
-                      </TransactionButton>
-                    </div>
-                  ))}
+                    <TransactionButton
+                      transaction={() => JoinBattle(battle)}
+                      onTransactionConfirmed={() => {
+                        toast.success("Battle Joined");
+                      }}
+                    >
+                      Join
+                    </TransactionButton>
                   </div>
+                ))}
+              </div>
             ) : (
               <div className="flex items-center">
                 <p className="text-lg font-light text-white">
@@ -265,11 +271,14 @@ export default function JoinBattle() {
                 onChange={(e) => setBattleId(e.target.value)}
               />
               {battleId && (
-                <TransactionButton transaction={()=>handleCreateBattle(battleId)} onTransactionConfirmed={()=>{
-                  toast.success("Battle Created");
-                  fetchBattles();
-                  setBattleId("");
-                }}>
+                <TransactionButton
+                  transaction={() => handleCreateBattle(battleId)}
+                  onTransactionConfirmed={() => {
+                    toast.success("Battle Created");
+                    fetchBattles();
+                    setBattleId("");
+                  }}
+                >
                   Create Button
                 </TransactionButton>
               )}
